@@ -1,0 +1,40 @@
+{Grab Candle Sell Short Strategy}
+variables:
+	delta_band(0),
+	unit1Entry(0),
+	unit2Entry(0),
+	unit3Entry(0);
+
+Condition1 = Close < XAverage(Low, 34) and Open > XAverage(Low, 34);
+Condition2 = Close > XAverage(High, 34) and Open < XAverage(High, 34);
+
+
+// Close position if it closes above 34 EMA ?High?? 
+If marketposition = -1 and Condition2 then begin
+	BuytoCover ("Close") next bar at market; 
+end else begin
+	//calculate entry levels for add on position after first position is established.
+	if (Marketposition = -1) AND (Barssinceentry = 0) then begin
+		unit1Entry = EntryPrice - delta_band; 
+		unit2Entry = unit1Entry - delta_band;
+		unit3Entry = unit2Entry - delta_band;
+	end;  
+	
+	If (Currententries = 1) then begin 
+		SellShort ("Unit1") 20000 shares next bar at unit1Entry stop;	
+	end; 
+	
+	If (Currententries = 2) then begin 
+		SellShort ("Unit2") 30000 shares next bar at unit2Entry stop;	
+	end; 
+	
+	If (Currententries = 3) then begin 
+		SellShort ("Unit3") 40000 shares next bar at unit3Entry stop;	 
+	end; 
+	
+	If marketposition = 0 and Condition1 then begin 
+		SellShort ("Short") 10000 shares next bar at market;  
+		delta_band = 1*(XAverage(High, 34) - XAverage(Low,34));
+	end;
+end; 
+
